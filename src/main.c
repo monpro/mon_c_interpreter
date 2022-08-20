@@ -1,6 +1,9 @@
-#include <stdio.h>
+#include <stdlib.h>
+#include "chunk.h"
 
 int main() {
-    printf("Hello, World!\n");
+    Chunk* chunk;
+    chunk = malloc(sizeof(Chunk));
+    initChunk(chunk);
     return 0;
 }
