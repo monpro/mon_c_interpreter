@@ -3,4 +3,4 @@ project(mon_c_interpreter C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(mon_c_interpreter src/main.c src/common.h src/chunk.h src/chunk.c src/memory.h src/memory.c)
+add_executable(mon_c_interpreter src/main.c src/common.h src/chunk.h src/chunk.c src/memory.h src/memory.c src/debug.h src/debug.c)
