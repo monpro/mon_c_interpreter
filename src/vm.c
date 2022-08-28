@@ -7,14 +7,30 @@
 // Single Global VM Object
 VM vm;
 
+void resetStack() {
+    vm.stackTop = vm.stack;
+}
+
 InterpretResult run();
 
-void initVM() {
+void resetStack();
 
+void initVM() {
+    resetStack();
 }
 
 void freeVM() {
 
+}
+
+void push(Value value){
+    *vm.stackTop = value;
+    vm.stackTop++;
+}
+
+Value pop() {
+    vm.stackTop--;
+    return *vm.stackTop;
 }
 
 InterpretResult run() {
