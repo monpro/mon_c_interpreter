@@ -31,5 +31,5 @@ typedef struct {
 
 
 void initScanner(const char* source);
-
+Token scanToken();
 #endif //MON_C_INTERPRETER_SCANNER_H
