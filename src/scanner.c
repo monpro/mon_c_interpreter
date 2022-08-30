@@ -51,7 +51,42 @@ bool match(char expected) {
     return true;
 }
 
+char peek() {
+    return *scanner.current;
+}
+
+char peekNext() {
+    if (isAtEnd()) return '\0';
+    return scanner.current[1];
+}
+
+void skipWhiteSpace() {
+    for(;;) {
+        char ch = peek();
+        switch (ch) {
+            case ' ' :
+            case '\r':
+            case '\t':
+                advance();
+                break;
+            case '\n':
+                scanner.line++;
+                advance();
+                break;
+            case '/':
+                if (peekNext() == '/') {
+                    while (peek() != '\n' && !isAtEnd()) advance();
+                } else {
+                    return;
+                }
+            default:
+                return;
+        }
+    }
+}
+
 Token scanToken() {
+    skipWhiteSpace();
     scanner.start = scanner.current;
     if (isAtEnd()) return makeToken(TOKEN_EOF);
     char ch = advance();
