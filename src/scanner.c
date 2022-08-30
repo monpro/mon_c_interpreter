@@ -85,11 +85,39 @@ void skipWhiteSpace() {
     }
 }
 
+Token string() {
+    while (peek() != '"' && !isAtEnd()) {
+        if (peek() == '\n')
+            scanner.line++;
+        advance();
+    }
+
+    if (isAtEnd()) return errorToken("Unterminated String.");
+    advance();
+    return makeToken(TOKEN_STRING);
+}
+
+
+bool isDigit(char ch) {
+    return ch >= '0' && ch <= '9';
+}
+
+Token number() {
+    while (isDigit(peek())) advance();
+
+    if (peek() == '.' && isDigit(peekNext())) {
+        advance();
+        while (isDigit(peek())) advance();
+    }
+    return makeToken(TOKEN_NUMBER);
+}
+
 Token scanToken() {
     skipWhiteSpace();
     scanner.start = scanner.current;
     if (isAtEnd()) return makeToken(TOKEN_EOF);
     char ch = advance();
+    if (isDigit(ch)) return number();
     switch (ch) {
         case '(': return makeToken(TOKEN_LEFT_PAREN);
         case ')': return makeToken(TOKEN_RIGHT_PAREN);
@@ -110,6 +138,8 @@ Token scanToken() {
             return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>':
             return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+        case '"':
+            return string();
     }
     //TODO: add token scan logic
     return errorToken("Unexpected character.");
