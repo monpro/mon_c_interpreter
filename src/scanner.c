@@ -116,9 +116,51 @@ bool isAlpha(char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
 }
 
+TokenType checkKeyWord(int start, int length, const char *rest, TokenType tokenType) {
+    if (scanner.current - scanner.start == start + length &&
+            memcmp(scanner.start + start, rest, length) == 0) {
+        return tokenType;
+    }
+    return TOKEN_IDENTIFIER;
+}
+
+TokenType identifierType() {
+    switch (scanner.start[0]) {
+        case 'a': return checkKeyWord(1, 2, "nd", TOKEN_AND);
+        case 'c': return checkKeyWord(1, 4, "lass", TOKEN_CLASS);
+        case 'e': return checkKeyWord(1, 3, "lse", TOKEN_ELSE);
+        case 'f':
+            if (scanner.current - scanner.start > 1) {
+                switch (scanner.start[1]) {
+                    case 'a': return checkKeyWord(2, 3, "lse", TOKEN_FALSE);
+                    case 'o': return checkKeyWord(2, 1, "r", TOKEN_FOR);
+                    case 'u': return checkKeyWord(2, 1, "n", TOKEN_FUN);
+                }
+            }
+            break;
+        case 'i': return checkKeyWord(1, 1, "f", TOKEN_IF);
+        case 'n': return checkKeyWord(1, 2, "il", TOKEN_NIL);
+        case 'o': return checkKeyWord(1, 1, "r", TOKEN_OR);
+        case 'p': return checkKeyWord(1, 4, "rint", TOKEN_PRINT);
+        case 'r': return checkKeyWord(1, 5, "eturn", TOKEN_RETURN);
+        case 's': return checkKeyWord(1, 4, "uper", TOKEN_SUPER);
+        case 't':
+            if (scanner.current - scanner.start > 1) {
+                switch (scanner.start[1]) {
+                    case 'h': return checkKeyWord(2, 2, "is", TOKEN_THIS);
+                    case 'r': return checkKeyWord(2, 2, "ue", TOKEN_TRUE);
+                }
+            }
+            break;
+        case 'v': return checkKeyWord(1, 2, "ar", TOKEN_VAR);
+        case 'w': return checkKeyWord(1, 4, "hile", TOKEN_WHILE);
+
+    }
+}
+
 Token identifier() {
     while (isAlpha(peek()) || isDigit(peek())) advance();
-    return makeToken(TOKEN_IDENTIFIER);
+    return makeToken(identifierType());
 }
 
 Token scanToken() {
