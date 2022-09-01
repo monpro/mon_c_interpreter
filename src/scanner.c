@@ -112,11 +112,21 @@ Token number() {
     return makeToken(TOKEN_NUMBER);
 }
 
+bool isAlpha(char ch) {
+    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
+}
+
+Token identifier() {
+    while (isAlpha(peek()) || isDigit(peek())) advance();
+    return makeToken(TOKEN_IDENTIFIER);
+}
+
 Token scanToken() {
     skipWhiteSpace();
     scanner.start = scanner.current;
     if (isAtEnd()) return makeToken(TOKEN_EOF);
     char ch = advance();
+    if (isAlpha(ch)) return identifier();
     if (isDigit(ch)) return number();
     switch (ch) {
         case '(': return makeToken(TOKEN_LEFT_PAREN);
