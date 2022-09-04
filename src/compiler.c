@@ -1,4 +1,5 @@
 #include <printf.h>
+#include <stdlib.h>
 #include "scanner.h"
 #include "chunk.h"
 
@@ -72,6 +73,24 @@ void emitReturn() {
 
 void endCompiler() {
     emitReturn();
+}
+
+uint8_t makeConstant(double value) {
+    int constant = addConstant(currentChunk(), value);
+    if (constant > UINT8_MAX) {
+        error("Too many constants in one chunk.");
+        return 0;
+    }
+    return (uint8_t)constant;
+}
+
+void emitConstant(Value value) {
+    emitBytes(OP_CONSTANT, makeConstant(value));
+}
+
+void number() {
+    double value = strtod(parser.previous.start, NULL);
+    emitConstant(value);
 }
 
 bool compile(const char* source, Chunk* chunk) {
