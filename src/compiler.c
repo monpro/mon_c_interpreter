@@ -75,6 +75,11 @@ void endCompiler() {
     emitReturn();
 }
 
+
+void expression() {
+
+}
+
 uint8_t makeConstant(double value) {
     int constant = addConstant(currentChunk(), value);
     if (constant > UINT8_MAX) {
@@ -91,6 +96,25 @@ void emitConstant(Value value) {
 void number() {
     double value = strtod(parser.previous.start, NULL);
     emitConstant(value);
+}
+
+void unary() {
+    TokenType  operatorType = parser.previous.type;
+
+    expression();
+
+    switch (operatorType) {
+        case TOKEN_MINUS:
+            emitByte(OP_NEGATE);
+            break;
+        default:
+            return;
+    }
+}
+
+void grouping() {
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
 bool compile(const char* source, Chunk* chunk) {
