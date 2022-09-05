@@ -27,6 +27,16 @@ typedef enum {
     PREC_PRIMARY
 } Precedence;
 
+typedef void (*ParseFn)();
+
+typedef struct {
+    ParseFn prefix;
+    // the function to compile an infix expression
+    // whose left operand is followed by a token of that type.
+    ParseFn infix;
+    Precedence precedence;
+} ParseRule;
+
 Parser parser;
 Chunk* compilingChunk;
 
@@ -113,6 +123,33 @@ void parsePrecedence() {
 
 }
 
+ParseRule *getRule(TokenType type) {
+    return NULL;
+}
+
+void binary() {
+    TokenType operatorType = parser.previous.type;
+
+    ParseRule* rule = getRule(operatorType);
+
+    parsePrecedence((Precedence)(rule -> precedence + 1));
+    switch (operatorType) {
+        case TOKEN_PLUS:
+            emitByte(OP_ADD);
+            break;
+        case TOKEN_MINUS:
+            emitByte(OP_SUBTRACT);
+            break;
+        case TOKEN_STAR:
+            emitByte(OP_MULTIPLY);
+            break;
+        case TOKEN_SLASH:
+            emitByte(OP_DIVIDE);
+            break;
+        default:
+            return;
+    }
+}
 
 void number() {
     double value = strtod(parser.previous.start, NULL);
