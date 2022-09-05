@@ -39,7 +39,7 @@ Token errorToken(const char* message) {
     return token;
 }
 
-char advance() {
+static char advance() {
     scanner.current++;
     return scanner.current[-1];
 }
@@ -102,7 +102,7 @@ bool isDigit(char ch) {
     return ch >= '0' && ch <= '9';
 }
 
-Token number() {
+static Token number() {
     while (isDigit(peek())) advance();
 
     if (peek() == '.' && isDigit(peekNext())) {
