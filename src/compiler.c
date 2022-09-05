@@ -12,6 +12,21 @@ typedef struct {
     bool panicMode;
 } Parser;
 
+typedef enum {
+    // precedence level from low to high
+    PREC_NONE,
+    PREC_ASSIGNMENT, // =
+    PREC_OR,         // or
+    PREC_AND,        // and
+    PREC_EQUALITY,   // == !=
+    PREC_COMPARISION,// < > <= >=
+    PREC_TERM,       // + -
+    PREC_FACTOR,     // * /
+    PREC_UNARY,      // ! -
+    PREC_CALL,       // . ()
+    PREC_PRIMARY
+} Precedence;
+
 Parser parser;
 Chunk* compilingChunk;
 
@@ -76,9 +91,6 @@ void endCompiler() {
 }
 
 
-void expression() {
-
-}
 
 uint8_t makeConstant(double value) {
     int constant = addConstant(currentChunk(), value);
@@ -93,15 +105,28 @@ void emitConstant(Value value) {
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
+// when parse the precedence,
+// only parsed those who have higher precedence
+// eg: -a.b + c, parsePrecedence(PREC_UNARY) will stop at -a.b
+// because PREC_TERM have lower precedence than PREC_UNARY
+void parsePrecedence() {
+
+}
+
+
 void number() {
     double value = strtod(parser.previous.start, NULL);
     emitConstant(value);
 }
 
+void expression() {
+    parsePrecedence(PREC_ASSIGNMENT);
+}
+
 void unary() {
     TokenType  operatorType = parser.previous.type;
 
-    expression();
+    parsePrecedence(PREC_UNARY);
 
     switch (operatorType) {
         case TOKEN_MINUS:
