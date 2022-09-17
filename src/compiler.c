@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "chunk.h"
+#include "debug.h"
 
 typedef struct {
     Token current;
@@ -99,6 +100,11 @@ void emitReturn() {
 
 void endCompiler() {
     emitReturn();
+#ifdef DEBUG_PRINT_CODE
+    if (!parser.hadError) {
+        disassembleChunk(currentChunk(), "code");
+    }
+#endif
 }
 
 ParseRule* getRule(TokenType type);
@@ -242,7 +248,7 @@ bool compile(const char* source, Chunk* chunk) {
     initScanner(source);
     compilingChunk = chunk;
     advance();
-    //expression();
+    expression();
     consume(TOKEN_EOF, "Expect the end of expression");
     endCompiler();
     return !parser.hadError;
