@@ -120,8 +120,20 @@ void emitConstant(Value value) {
 // only parsed those who have higher precedence
 // eg: -a.b + c, parsePrecedence(PREC_UNARY) will stop at -a.b
 // because PREC_TERM have lower precedence than PREC_UNARY
-void parsePrecedence() {
+void parsePrecedence(Precedence precedence) {
+    advance();
+    ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+    if (prefixRule == NULL) {
+        error("Expect expression.");
+        return;
+    }
+    prefixRule();
 
+    while (precedence <= getRule(parser.current.type)->precedence) {
+        advance();
+        ParseFn infixRule = getRule(parser.previous.type)->infix;
+        infixRule();
+    }
 }
 
 void binary() {
