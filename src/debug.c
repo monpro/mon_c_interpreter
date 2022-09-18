@@ -17,7 +17,7 @@ static int simpleInstruction(const char* name, int offset) {
 }
 
 void printValue(Value value) {
-    printf("%g", value);
+    printf("%g", AS_NUMBER(value));
 }
 
 static int constantInstruction(const char *name,
