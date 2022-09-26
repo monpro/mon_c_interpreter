@@ -109,7 +109,7 @@ void endCompiler() {
 
 ParseRule* getRule(TokenType type);
 
-uint8_t makeConstant(double value) {
+uint8_t makeConstant(Value value) {
     int constant = addConstant(currentChunk(), value);
     if (constant > UINT8_MAX) {
         error("Too many constants in one chunk.");
@@ -160,6 +160,22 @@ void binary() {
             break;
         case TOKEN_SLASH:
             emitByte(OP_DIVIDE);
+            break;
+        default:
+            return;
+    }
+}
+
+static void literal() {
+    switch (parser.previous.type) {
+        case TOKEN_FALSE:
+            emitByte(TOKEN_FALSE);
+            break;
+        case TOKEN_NIL:
+            emitByte(TOKEN_NIL);
+            break;
+        case TOKEN_TRUE:
+            emitByte(TOKEN_TRUE);
             break;
         default:
             return;
@@ -220,17 +236,17 @@ ParseRule rules[] = {
         [TOKEN_AND] = {NULL, NULL, PREC_NONE},
         [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
         [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
-        [TOKEN_FALSE] = {NULL, NULL, PREC_NONE},
+        [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
         [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
         [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
         [TOKEN_IF] = {NULL, NULL, PREC_NONE},
-        [TOKEN_NIL] = {NULL, NULL, PREC_NONE},
+        [TOKEN_NIL] = {literal, NULL, PREC_NONE},
         [TOKEN_OR] = {NULL, NULL, PREC_NONE},
         [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
         [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
         [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
         [TOKEN_THIS] = {NULL, NULL, PREC_NONE},
-        [TOKEN_TRUE] = {NULL, NULL, PREC_NONE},
+        [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
         [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
         [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
         [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
