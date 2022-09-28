@@ -82,6 +82,7 @@ InterpretResult run() {
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
+                printf("value is ", constant);
                 push(constant);
                 break;
             }

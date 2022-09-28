@@ -28,7 +28,6 @@ void printValue(Value value) {
             printf("%g", AS_NUMBER(value));
             break;
     }
-    printf("%g", AS_NUMBER(value));
 }
 
 static int constantInstruction(const char *name,
