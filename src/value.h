@@ -3,6 +3,7 @@
 #include "common.h"
 
 typedef struct Obj Obj;
+typedef struct ObjString objString;
 
 typedef enum {
     VAL_BOOL,
