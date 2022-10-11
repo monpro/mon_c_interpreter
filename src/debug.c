@@ -2,6 +2,8 @@
 
 #include "debug.h"
 
+void printObject(Value value);
+
 void disassembleChunk(Chunk* chunk, const char* name) {
     printf("--- %s ---\n", name);
     int offset = 0;
@@ -27,8 +29,13 @@ void printValue(Value value) {
         case VAL_NUMBER:
             printf("%g", AS_NUMBER(value));
             break;
+        case VAL_OBJ:
+            printObject(value);
+            break;
     }
 }
+
+
 
 static int constantInstruction(const char *name,
                                Chunk *chunk,
