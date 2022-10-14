@@ -18,5 +18,5 @@
   reallocate(pointer, sizeof(type) * (oldCount), 0)
 
 void* reallocate(void * pinter, size_t oldSize, size_t newSize);
-
+void freeObjects();
 #endif //MON_C_INTERPRETER_MEMORY_H
