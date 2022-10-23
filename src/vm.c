@@ -90,7 +90,6 @@ InterpretResult run() {
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
-                printf("value is ", constant);
                 push(constant);
                 break;
             }
@@ -147,10 +146,15 @@ InterpretResult run() {
 
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
-            case OP_RETURN:
+            case OP_PRINT:
                 printValue(pop());
                 printf("\n");
-                return INTERPRET_OK;
+                break;
+//            case OP_RETURN:
+//                printValue(pop());
+//                printf("\n");
+//                return INTERPRET_OK;
+
         }
     }
 #undef READ_BYTE
