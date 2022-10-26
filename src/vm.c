@@ -67,8 +67,8 @@ static bool isFalsey(Value value) {
 }
 InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
-#define READ_STRING() AS_STRING(READ_CONSTANT())
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_STRING() AS_STRING(READ_CONSTANT())
 #define BINARY_OP(valueType, op) \
     do { \
         if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
@@ -88,7 +88,7 @@ InterpretResult run() {
             printValue(*value);
             printf("]");
         }
-        disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
+//        disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
     #endif
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
@@ -105,11 +105,23 @@ InterpretResult run() {
             case OP_FALSE:
                 push(BOOL_VAL(false));
                 break;
-            case OP_DEFINE_GLOBAL:
-                ObjString* name = READ_STRING();
+            case OP_DEFINE_GLOBAL: {
+                ObjString *name = READ_STRING();
                 tableSet(&vm.globals, name, peek(0));
                 pop();
                 break;
+            }
+
+            case OP_GET_GLOBAL: {
+                ObjString* name = READ_STRING();
+                Value value;
+                if (!tableGet(&vm.globals, name, &value)) {
+                    runTimeError("Undefined variable '%s'.", name->chars);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(value);
+                break;
+            }
             case OP_EQUAL: {
                 Value b = pop();
                 Value a = pop();
@@ -123,7 +135,7 @@ InterpretResult run() {
                 BINARY_OP(BOOL_VAL, <);
                 break;
             case OP_ADD: {
-                if (IS_STRING(peek(0)) && IS_NUMBER(peek(1))) {
+                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
                     concatenate();
                 } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
                     double b = AS_NUMBER(pop());
@@ -162,10 +174,9 @@ InterpretResult run() {
             case OP_POP:
                 pop();
                 break;
-//            case OP_RETURN:
-//                printValue(pop());
-//                printf("\n");
-//                return INTERPRET_OK;
+            case OP_RETURN:
+                printf("\n");
+                return INTERPRET_OK;
 
         }
     }

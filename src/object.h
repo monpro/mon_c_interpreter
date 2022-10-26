@@ -31,6 +31,6 @@ ObjString* takeString(char* chars, int length);
 void printObject(Value value);
 
 static inline bool isObjType(Value value, ObjType type) {
-    return IS_BOOL(value) && AS_OBJ(value)->type == type;
+    return IS_OBJ(value) && AS_OBJ(value)->type == type;
 }
 #endif //MON_C_INTERPRETER_OBJECT_H
