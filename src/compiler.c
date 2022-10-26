@@ -225,17 +225,22 @@ static void string() {
     emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
 
+void expression() {
+    parsePrecedence(PREC_ASSIGNMENT);
+}
+
 static void namedVariable(Token name) {
     uint8_t arg = identifierConstant(&name);
-    emitBytes(OP_GET_GLOBAL, arg);
+    if (match(TOKEN_EQUAL)) {
+        expression();
+        emitBytes(OP_SET_GLOBAL, arg);
+    } else {
+        emitBytes(OP_GET_GLOBAL, arg);
+    }
 }
 
 static void variable() {
     namedVariable(parser.previous);
-}
-
-void expression() {
-    parsePrecedence(PREC_ASSIGNMENT);
 }
 
 static void printStatement() {
