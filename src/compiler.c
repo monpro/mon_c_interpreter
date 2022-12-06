@@ -133,6 +133,10 @@ void endCompiler() {
 
 ParseRule* getRule(TokenType type);
 
+static void block();
+
+static void declaration();
+
 uint8_t makeConstant(Value value) {
     int constant = addConstant(currentChunk(), value);
     if (constant > UINT8_MAX) {
@@ -251,6 +255,13 @@ void expression() {
     parsePrecedence(PREC_ASSIGNMENT);
 }
 
+static void block() {
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+        declaration();
+    }
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+
 static void namedVariable(Token name, bool canAssign) {
     uint8_t arg = identifierConstant(&name);
     if (canAssign && match(TOKEN_EQUAL)) {
@@ -277,10 +288,23 @@ static void expressionStatement() {
     emitByte(OP_POP);
 }
 
+static void beginScope() {
+    current->scopeDepth++;
+}
+
+static void endScope() {
+    current->scopeDepth--;
+}
+
 static void statement() {
     if (match(TOKEN_PRINT)) {
         printStatement();
-    } else {
+    } else if(match(TOKEN_LEFT_BRACE)) {
+        beginScope();
+        block();
+        endScope();
+    }
+    else {
         expressionStatement();
     }
 }
