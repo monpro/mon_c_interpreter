@@ -52,6 +52,10 @@ typedef struct {
     int scopeDepth;
 } Compiler;
 
+static void expression();
+static void statement();
+static void declaration();
+
 Parser parser;
 Compiler* current = NULL;
 Chunk* compilingChunk;
@@ -354,6 +358,41 @@ static void expressionStatement() {
     emitByte(OP_POP);
 }
 
+static int emitJump(uint8_t instruction) {
+    // Emit the given instruction byte to the current chunk.
+    emitByte(instruction);
+    // Emit two placeholder bytes to the current chunk. These will be used to store the jump offset later.
+    emitByte(0xff);
+    emitByte(0xff);
+    // Return the index of the first placeholder byte in the current chunk.
+    // This will be used to patch the jump offset later.
+    return currentChunk()->count - 2;
+}
+
+static void patchJump(int offset) {
+    // Calculate the jump offset as the distance from the jump instruction to the jump destination.
+    int jump = currentChunk()->count - offset - 2;
+
+    // Check if the jump offset is too large to fit in 16 bits.
+    if (jump > UINT16_MAX) error("Too much code to jump over");
+
+    // Update the placeholder bytes at the specified offset with the calculated jump offset.
+    // The jump offset is stored as two bytes in big-endian order.
+    currentChunk()->code[offset] = (jump >> 8) & 0xff;
+    currentChunk()->code[offset + 1] = jump & 0xff;
+
+}
+
+static void ifStatement() {
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+    int thenJump = emitJump(OP_JUMP_IF_FALSE);
+    statement();
+    patchJump(thenJump);
+}
+
+
 static void beginScope() {
     current->scopeDepth++;
 }
@@ -373,6 +412,8 @@ static void statement() {
         beginScope();
         block();
         endScope();
+    } else if (match(TOKEN_IF)) {
+        ifStatement();
     }
     else {
         expressionStatement();
