@@ -388,8 +388,10 @@ static void ifStatement() {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
     int thenJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
     statement();
     int elseJump = emitJump(OP_JUMP);
+    emitByte(OP_POP);
     patchJump(thenJump);
     if (match(TOKEN_ELSE)) statement();
 }
