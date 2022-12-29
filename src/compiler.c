@@ -473,6 +473,17 @@ static void and_(bool canAssign) {
     parsePrecedence(PREC_AND);
     patchJump(endJump);
 }
+
+
+static void or_(bool canAssign) {
+    int elseJump = emitJump(OP_JUMP_IF_FALSE);
+    int endJump = emitJump(OP_JUMP);
+    patchJump(elseJump);
+    emitJump(OP_POP);
+
+    parsePrecedence(PREC_OR);
+    patchJump(endJump);
+}
 static void varDeclaration() {
     uint8_t global = parseVariable("Expect Variable name");
     if (match(TOKEN_EQUAL)) {
@@ -548,7 +559,7 @@ ParseRule rules[] = {
         [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
         [TOKEN_IF] = {NULL, NULL, PREC_NONE},
         [TOKEN_NIL] = {literal, NULL, PREC_NONE},
-        [TOKEN_OR] = {NULL, NULL, PREC_NONE},
+        [TOKEN_OR] = {NULL, or_, PREC_NONE},
         [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
         [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
         [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
