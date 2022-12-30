@@ -136,13 +136,16 @@ void emitReturn() {
     emitByte(OP_RETURN);
 }
 
-void endCompiler() {
+static ObjFunction *endCompiler() {
     emitReturn();
+    ObjFunction *function = current->function;
 #ifdef DEBUG_PRINT_CODE
     if (!parser.hadError) {
-        disassembleChunk(currentChunk(), "code");
+        disassembleChunk(currentChunk(),
+                         function->name != NULL ? function->name->chars : "<script>");
     }
 #endif
+    return function;
 }
 
 ParseRule* getRule(TokenType type);
@@ -168,10 +171,18 @@ void emitConstant(Value value) {
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
-static void initCompiler(Compiler* compiler) {
+static void initCompiler(Compiler* compiler, FunctionType type) {
+    compiler->function = NULL;
+    compiler->type = type;
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
+    compiler->function = newFunction();
     current = compiler;
+
+    Local* local = &current->locals[current->localCount++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
 }
 
 // when parse the precedence,
@@ -657,19 +668,18 @@ ParseRule* getRule(TokenType type) {
 }
 
 
-bool compile(const char* source, Chunk* chunk) {
+ObjFunction* compile(const char* source) {
     parser.panicMode = false;
     parser.hadError = false;
     initScanner(source);
     Compiler compiler;
-    initCompiler(&compiler);
-    compilingChunk = chunk;
+    initCompiler(&compiler, TYPE_SCRIPT);
     advance();
 //    expression();
 //    consume(TOKEN_EOF, "Expect the end of expression");
     while (!match(TOKEN_EOF)) {
         declaration();
     }
-    endCompiler();
-    return !parser.hadError;
+    ObjFunction* function = endCompiler();
+    return parser.hadError ? NULL : function;
 }
