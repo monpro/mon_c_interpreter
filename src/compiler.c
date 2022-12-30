@@ -55,7 +55,7 @@ typedef struct {
 static void expression();
 static void statement();
 static void declaration();
-
+static void varDeclaration();
 Parser parser;
 Compiler* current = NULL;
 Chunk* compilingChunk;
@@ -421,7 +421,13 @@ static void emitLoop(int loopStart) {
 static void whileStatement() {
     int loopStart = currentChunk()->count;
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
-    expression();
+    if (match(TOKEN_SEMICOLON)) {
+
+    } else if (match(TOKEN_VAR)) {
+        varDeclaration();
+    } else {
+        expressionStatement();
+    }
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition");
 
     int exitJump = emitJump(OP_JUMP_IF_FALSE);
@@ -431,6 +437,18 @@ static void whileStatement() {
     patchJump(exitJump);
     emitByte(OP_POP);
 
+}
+
+static void forStatement() {
+    beginScope();
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
+    consume(TOKEN_SEMICOLON, "Expect ';' after ");
+    int loopStart = currentChunk()->count;
+    consume(TOKEN_SEMICOLON, "Expect ';'.");
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses");
+    statement();
+    emitLoop(loopStart);
+    endScope();
 }
 
 static void statement() {
@@ -444,6 +462,8 @@ static void statement() {
         ifStatement();
     } else if (match(TOKEN_WHILE)) {
         whileStatement();
+    } else if (match(TOKEN_FOR)) {
+        forStatement();
     }
     else {
         expressionStatement();
@@ -510,6 +530,7 @@ static void or_(bool canAssign) {
     parsePrecedence(PREC_OR);
     patchJump(endJump);
 }
+
 static void varDeclaration() {
     uint8_t global = parseVariable("Expect Variable name");
     if (match(TOKEN_EQUAL)) {
