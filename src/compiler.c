@@ -444,10 +444,22 @@ static void forStatement() {
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
     consume(TOKEN_SEMICOLON, "Expect ';' after ");
     int loopStart = currentChunk()->count;
+    int exitJump = -1;
+    if (!match(TOKEN_SEMICOLON)) {
+        expression();
+        consume(TOKEN_SEMICOLON, "Expect ';' after loop condition");
+        exitJump = emitJump(OP_JUMP_IF_FALSE);
+        emitJump(OP_POP);
+    }
     consume(TOKEN_SEMICOLON, "Expect ';'.");
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses");
     statement();
     emitLoop(loopStart);
+
+    if (exitJump != -1) {
+        patchJump(exitJump);
+        emitByte(OP_POP);
+    }
     endScope();
 }
 
