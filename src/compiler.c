@@ -442,7 +442,12 @@ static void whileStatement() {
 static void forStatement() {
     beginScope();
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
-    consume(TOKEN_SEMICOLON, "Expect ';' after ");
+    if (match(TOKEN_SEMICOLON)) {
+    } else if (match(TOKEN_VAR)) {
+        varDeclaration();
+    } else {
+        expressionStatement();
+    }
     int loopStart = currentChunk()->count;
     int exitJump = -1;
     if (!match(TOKEN_SEMICOLON)) {
@@ -451,8 +456,16 @@ static void forStatement() {
         exitJump = emitJump(OP_JUMP_IF_FALSE);
         emitJump(OP_POP);
     }
-    consume(TOKEN_SEMICOLON, "Expect ';'.");
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses");
+    if (!match(TOKEN_RIGHT_PAREN)) {
+        int bodyJump = emitJump(OP_JUMP);
+        int incrementStart = currentChunk()->count;
+        expression();
+        emitByte(OP_POP);
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
+        emitLoop(loopStart);
+        loopStart = incrementStart;
+        patchJump(bodyJump);
+    }
     statement();
     emitLoop(loopStart);
 
