@@ -15,6 +15,7 @@ VM vm;
 
 void resetStack() {
     vm.stackTop = vm.stack;
+    vm.frameCount = 0;
 }
 
 InterpretResult run();
