@@ -52,6 +52,7 @@ typedef enum {
 } FunctionType;
 
 typedef struct {
+    struct Compiler* enclosing;
     ObjFunction* function;
     FunctionType type;
 
@@ -145,6 +146,7 @@ static ObjFunction *endCompiler() {
                          function->name != NULL ? function->name->chars : "<script>");
     }
 #endif
+    current = (Compiler *) current->enclosing;
     return function;
 }
 
@@ -172,6 +174,7 @@ void emitConstant(Value value) {
 }
 
 static void initCompiler(Compiler* compiler, FunctionType type) {
+    compiler->enclosing = current;
     compiler->function = NULL;
     compiler->type = type;
     compiler->localCount = 0;
