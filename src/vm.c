@@ -74,6 +74,14 @@ static bool isFalsey(Value value) {
  *  The function returns true upon completion.
  */
 static bool call(ObjFunction *function, int count) {
+    if (count != function->arity) {
+        runTimeError("Expected %d arguments but god %d.", function->arity, count);
+        return false;
+    }
+    if (vm.frameCount == FRAMES_MAX) {
+        runTimeError("Stack overflow");
+        return false;
+    }
     CallFrame* callFrame = &vm.frames[vm.frameCount++];
     callFrame->function = function;
     callFrame->ip = function->chunk.code;
