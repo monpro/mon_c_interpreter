@@ -24,6 +24,12 @@ ObjFunction* newFunction() {
     return function;
 }
 
+ObjNative* newNative(NativeFn nativeFn) {
+    ObjNative* native = ALLOCATE_OBJ(ObjNative, OBJ_NATIVE);
+    native->function = nativeFn;
+    return native;
+}
+
 static ObjString* allocateString(char* chars, int length, uint32_t hash) {
     struct ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
     string->length = length;
@@ -76,6 +82,9 @@ void printObject(Value value) {
             break;
         case OBJ_FUNCTION:
             printFunction(AS_FUNCTION(value));
+            break;
+        case OBJ_NATIVE:
+            printFunction("<native fn>");
             break;
     }
 }
