@@ -31,6 +31,12 @@ ObjFunction* newFunction() {
     return function;
 }
 
+ObjUpvalue* newUpvalue(Value* slot) {
+    ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
+    upvalue->location = slot;
+    return upvalue;
+}
+
 ObjNative* newNative(NativeFn nativeFn) {
     ObjNative* native = ALLOCATE_OBJ(ObjNative, OBJ_NATIVE);
     native->function = nativeFn;
@@ -95,6 +101,9 @@ void printObject(Value value) {
             break;
         case OBJ_CLOSURE:
             printFunction(AS_CLOSURE(value)->function);
+            break;
+        case OBJ_UPVALUE:
+            printFunction("upvalue");
             break;
     }
 }
