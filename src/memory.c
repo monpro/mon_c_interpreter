@@ -36,6 +36,8 @@ void freeObject(Obj *obj) {
             break;
         }
         case OBJ_CLOSURE: {
+            ObjClosure* closure = (ObjClosure*)obj;
+            FREE_ARRAY(ObjUpvalue*, closure->upvalues, closure->upvalueCount);
             FREE(ObjClosure, obj);
             break;
         }
