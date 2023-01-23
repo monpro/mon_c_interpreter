@@ -69,7 +69,7 @@ ObjClosure* newClosure(ObjFunction* function);
 ObjFunction* newFunction();
 ObjNative * newNative(NativeFn nativeFn);
 ObjString* copyString(const char* chars, int length);
-ObjUpvalue* newValue(Value* slot);
+ObjUpvalue* newUpvalue(Value* slot);
 ObjString* takeString(char* chars, int length);
 void printObject(Value value);
 
