@@ -153,6 +153,15 @@ ObjUpvalue *captureUpvalue(Value *local) {
     return updatedUpvalue;
 }
 
+static void closeUpvalues(Value* value) {
+    while (vm.openUpvalues != NULL && vm.openUpvalues->location >= value) {
+        ObjUpvalue* upvalue = vm.openUpvalues;
+        upvalue->closed = *upvalue->location;
+        upvalue->location = &upvalue->closed;
+        vm.openUpvalues = upvalue->next;
+    }
+}
+
 InterpretResult run() {
     CallFrame* frame = &vm.frames[vm.frameCount - 1];
 #define READ_BYTE() (*frame->ip++)
@@ -307,8 +316,14 @@ InterpretResult run() {
                 frame = &vm.frames[vm.frameCount - 1];
                 break;
             }
+            case OP_CLOSE_UPVALUE: {
+                closeUpvalues(vm.stackTop - 1);
+                pop();
+                break;
+            }
             case OP_RETURN: {
                 Value result = pop();
+                closeUpvalues(frame->slots);
                 vm.frameCount--;
                 if (vm.frameCount == 0) {
                     pop();
