@@ -20,5 +20,6 @@
 #define FREE(type, pointer) reallocate(pointer, sizeof(type), 0)
 
 void* reallocate(void * pinter, size_t oldSize, size_t newSize);
+void collectGarbage();
 void freeObjects();
 #endif //MON_C_INTERPRETER_MEMORY_H
