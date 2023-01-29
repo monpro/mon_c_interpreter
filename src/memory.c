@@ -4,6 +4,11 @@
 #include "vm.h"
 #include "object.h"
 
+#ifdef DEBUG_LOG_GC
+#include <stdio.h>
+#include "debug.h"
+#endif
+
 void freeObject(Obj *pObj);
 
 void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
@@ -23,6 +28,9 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
 }
 
 void freeObject(Obj *obj) {
+#ifdef DEBUG_LOG_GC
+    printf("%p free type %d\n", (void*)obj, obj->type);
+#endif
     switch (obj->type) {
         case OBJ_STRING: {
             ObjString *string = (ObjString *) obj;
@@ -53,7 +61,14 @@ void freeObject(Obj *obj) {
     }
 }
 
-void collectGarbage() {}
+void collectGarbage() {
+#ifdef DEBUG_LOG_GC
+    printf("-- gc begin\n");
+#endif
+#ifdef DEBUG_LOG_GC
+    printf("-- gc end\n");
+#endif
+}
 
 void freeObjects() {
     Obj* object = vm.objects;
