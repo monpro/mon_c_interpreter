@@ -104,6 +104,14 @@ void tableAddAll(Table* from, Table* to) {
     }
 }
 
+void markTable(Table* table) {
+    for (int i = 0; i < table->capacity; i++) {
+        Entry* entry = &table->entries[i];
+        markObject((Obj*)entry->key);
+        markValue(entry->value);
+    }
+}
+
 ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t hash) {
     if (table->count == 0) return NULL;
     uint32_t index = hash % table->capacity;
