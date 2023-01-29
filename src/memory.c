@@ -7,6 +7,8 @@
 #ifdef DEBUG_LOG_GC
 #include <stdio.h>
 #include "debug.h"
+#include "compiler.h"
+
 #endif
 
 void freeObject(Obj *pObj);
@@ -79,7 +81,17 @@ static void markRoots() {
     for (Value* slot = vm.stack; slot < vm.stackTop; slot++) {
         markValue(*slot);
     }
+    // mark root for call frame closure
+    for (int i = 0; i < vm.frameCount; i++) {
+        markObject((Obj*)vm.frames[i].closure);
+    }
+
+    // mark upvalues
+    for (ObjUpvalue* upvalue = vm.openUpvalues; upvalue != NULL; upvalue = upvalue->next) {
+        markObject((Obj*)upvalue);
+    }
     markTable(&vm.globals);
+    markCompilerRoots();
 }
 
 void collectGarbage() {

@@ -4,5 +4,5 @@
 #include "object.h"
 
 ObjFunction* compile(const char* source);
-
+void markCompilerRoots();
 #endif //MON_C_INTERPRETER_COMPILER_H
